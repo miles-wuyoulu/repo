@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicTac</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            cursor: default;
+        }
+
+        ul:first-child {
+            width: 120px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        ul:first-child li {
+            list-style: none;
+            width: 40px;
+            height: 40px;
+            font-size: 30;
+            line-height: 40px;
+            text-align: center;
+            color: black;
+            background-color: pink;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+        <p class="show"></p>
+        <ul class="his"></ul>
+
+    </div>
+
+    <script>
+        var lis = document.querySelectorAll('li');
+        var show = document.querySelector('.show');
+        var hisList = document.querySelector('.his');
+        var inpCondition = new Array();
+        var histry = new Array();
+        var curHistry = new Array();
+
+        var flag = 'X';
+        for (let i = 0; i < 9; i++) {
+            let obj = { message: '', index: i };
+            inpCondition.push(obj);
+        }
+
+        const jdgArr = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+
+        //为每个方格绑定点击监听事件
+        for (let i = 0; i < lis.length; i++) {
+            lis[i].setAttribute('value', i);
+            lis[i].addEventListener('click', fn);
+        }
+
+        //点击方格，事件执行函数
+        function fn(e) {
+            // 以下代码是为了解决回跳点击，可从 start 读起
+            //以下代码：若点击回跳按钮，再次点击时，回跳列表更新，原数组更新
+            let hL = histry.length;
+            let cL = curHistry.length;
+            for (let i = cL; i < hL; i++) {
+                inpCondition[histry[i].index].message = '';
+                hisList.removeChild(hisList.children[cL]);
+            }
+            // start
+            inpCondition[e.target.getAttribute('value')].message = flag;
+            let obj = inpCondition[e.target.getAttribute('value')];
+            histry = [];
+            curHistry.push(obj);
+            curHistry.forEach(element => {
+                histry.push(element);
+            });
+
+            let li = document.createElement('li');
+            li.innerHTML = 'Go to move #' + histry.length;
+            li.setAttribute('value', histry.length);
+            li.addEventListener('click', fnn);
+            hisList.appendChild(li);
+            e.target.innerHTML = flag;
+            if (jdgCondition()) {
+                show.innerHTML = flag + 'Winner';
+                lis.forEach(v => {
+                    v.removeEventListener('click', fn)
+                });
+            } else {
+                show.innerHTML = '';
+            }
+            flag = flag == 'X' ? 'O' : 'X';
+            e.target.removeEventListener('click', fn);
+        }
+
+        // 以下代码是点击回跳按钮之后执行的逻辑
+        function fnn(e) {
+            let x = e.target.getAttribute('value');
+            curHistry = histry.slice(0, x);
+            lis.forEach(v => {
+                v.innerHTML = ''; v.addEventListener('click', fn);
+            });
+
+            curHistry.forEach(element => {
+                lis[element.index].innerHTML = element.message;
+                lis[element.index].removeEventListener('click', fn);
+            });
+            flag = curHistry.at(-1).message;
+            flag = flag == 'X' ? 'O' : 'X';
+
+        }
+
+        // 判断胜出代码
+        function jdgCondition() {
+            var indx = inpCondition.filter(v => v.message == flag).map(v => v.index);
+            for (let v of jdgArr) {
+                let [a, b, c] = v;
+                if (indx.includes(a) && indx.includes(b)
+                    && indx.includes(c)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    </script>
+
+
+
+</body>
+
+</html>
