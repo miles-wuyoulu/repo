@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicTac</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            cursor: default;
+        }
+
+        ul:first-child {
+            width: 120px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        ul:first-child li {
+            list-style: none;
+            width: 40px;
+            height: 40px;
+            font-size: 30;
+            line-height: 40px;
+            text-align: center;
+            color: black;
+            background-color: pink;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+        <ul class="game">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+        <p class="show"></p>
+        <ul class="his">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+
+    </div>
+
+
+    <script>
+        let lis = document.querySelector('.game').querySelectorAll('li');
+        let show = document.querySelector('.show');
+        let steplis = document.querySelector('.his').querySelectorAll('li');
+        let inpCondition = new Array();
+        let histry = new Array();
+        let curHistry = new Array();
+        let flag = 'X';
+        let winner = false;
+        for (let i = 0; i < 9; i++) {
+            let obj = { message: '', index: i };
+            inpCondition.push(obj);
+        }
+
+        let isStep = false;
+        let step = 1;
+        lis.forEach(l => l.textContent = '');
+        steplis.forEach(l => {
+            l.style.display = 'none';
+            l.setAttribute('value', step);
+            l.textContent = 'Go to move #' + (step);
+            step++;
+        });
+
+        const jdgArr = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+
+
+        for (let i = 0; i < lis.length; i++) {
+            lis[i].setAttribute('value', i);
+            lis[i].addEventListener('click', fn);
+        }
+
+        function fn(e) {
+            judgementIsJumt();
+
+            if (winner || e.target.textContent != '') {
+                return;
+            }
+
+            inpCondition[e.target.getAttribute('value')].message = flag;
+            let obj = inpCondition[e.target.getAttribute('value')];
+            histry.push(obj);
+            steplis[histry.length - 1].style.display = 'block';
+            winner = jdgCondition(flag);
+            winner ? show.innerHTML = flag + 'Winner' : show.innerHTML = '';
+            e.target.textContent = flag;
+            flag = flag == 'X' ? 'O' : 'X';
+        }
+
+        // steplis.forEach(l => l.addEventListener('click', fnn));
+        for (let i = 0; i < steplis.length; i++) {
+            steplis[i].addEventListener('click', function () {
+                console.log(i);
+                isStep = true;
+                curHistry = histry.slice(0, i + 1);
+                lis.forEach(element => {
+                    let isExit = curHistry.findIndex(e => e.index == element.getAttribute('value'));
+                    isExit == -1 ? element.textContent = '' : element.textContent = curHistry[isExit].message;
+                })
+            })
+        }
+
+
+        function judgementIsJumt() {
+            if (isStep) {
+                for (let i = curHistry.length; i < histry.length; i++) {
+                    inpCondition[histry[i].index].message = '';
+                    steplis[i].style.display = "none";
+                }
+                histry = curHistry;
+                winner = false;
+                isStep = false;
+                flag = curHistry.at(-1).message;
+                flag = flag == 'X' ? 'O' : 'X';
+            } else {
+                return;
+            }
+        }
+
+        
+
+        function jdgCondition(flag) {
+            let indx = inpCondition.filter(v => v.message == flag).map(v => v.index);
+            return jdgArr.some((jdg) => (jdg.every(v => indx.includes(v))));
+        }
+    </script>
+</body>
+
+</html>
